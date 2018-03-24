@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.protos;
+package com.calvin.http4stest;
 
 // The greeting service definition.
 service Greeter {

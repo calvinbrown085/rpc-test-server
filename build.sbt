@@ -12,6 +12,7 @@ val libraryDeps =  Seq(
   "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
   "org.specs2"     %% "specs2-core"          % Specs2Version % "test",
   "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
+  "io.grpc" % "grpc-stub" % "1.10.0",
   "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
   "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
 )
