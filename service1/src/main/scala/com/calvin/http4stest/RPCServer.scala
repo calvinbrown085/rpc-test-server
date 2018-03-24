@@ -26,22 +26,18 @@ class GreeterImpl extends GreeterGrpc.Greeter {
   }
 }
 
-object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
+object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   val service = HttpService[IO] {
     case GET -> Root / "hello" / name =>
       Ok(Json.obj("message" -> Json.fromString(s"Hello, ${name}")))
 
   }
-  //val rpcServer = IO.pure(new GreeterImpl)
-  val keypath: String = Paths.get("service1/src/main/resources/server.jks").toAbsolutePath.toString
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
       grpcServer <- Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global)).build.start))
       stream <- BlazeBuilder[IO]
-//                  .withSSL(StoreInfo(keypath, "password"), keyManagerPassword = "secure")
-//                  .enableHttp2(true)
-                  .bindHttp(8090, "0.0.0.0")
+                  .bindHttp(8080, "0.0.0.0")
                   .mountService(service, "/")
                   .serve concurrently Stream.eval(grpcServer)
     } yield stream

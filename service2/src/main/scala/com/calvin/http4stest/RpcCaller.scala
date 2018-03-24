@@ -16,7 +16,7 @@ import org.http4s.server.blaze.BlazeBuilder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
+object RpcCaller extends StreamApp[IO] with Http4sDsl[IO] {
   val channel = ManagedChannelBuilder.forAddress("0.0.0.0", 50051).usePlaintext(true).build
   val request = HelloRequest(name = "World")
   val service = HttpService[IO] {
@@ -25,17 +25,13 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
     case GET -> Root / "rpc-test" =>
       val blockingStub = GreeterGrpc.blockingStub(channel)
       val reply: HelloReply = blockingStub.sayHello(request)
-      println(reply)
       Ok(reply.toString)
 
   }
 
-  val keypath: String = Paths.get("service1/src/main/resources/server.jks").toAbsolutePath.toString
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     BlazeBuilder[IO]
-//      .withSSL(StoreInfo(keypath, "password"), keyManagerPassword = "secure")
-//      .enableHttp2(true)
       .bindHttp(9000, "0.0.0.0")
       .mountService(service, "/")
       .serve
