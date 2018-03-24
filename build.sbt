@@ -17,20 +17,20 @@ val libraryDeps =  Seq(
   "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
 )
 
-lazy val service1 = (project in file("service1"))
+lazy val rpc_server = (project in file("rpc-server"))
   .settings(
     organization := "com.calvin",
-    name := "http4s-test",
+    name := "rpc-server",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps
   )
 
-lazy val service2 = (project in file("service2"))
+lazy val rpc_caller = (project in file("rpc-caller"))
   .settings(
     organization := "com.calvin",
-    name := "http4s-test",
+    name := "rpc-caller",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.5",
     protobufSettings,
@@ -41,5 +41,5 @@ lazy val service2 = (project in file("service2"))
 lazy val root = project.in(file("."))
   .settings(name := "rpc-test-root")
   .aggregate(
-    `service1`, `service2`
+    `rpc_server`, `rpc_caller`
   )
