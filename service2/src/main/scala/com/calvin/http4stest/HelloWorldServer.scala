@@ -17,7 +17,7 @@ import org.http4s.server.blaze.BlazeBuilder
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
-  val channel = ManagedChannelBuilder.forAddress("0.0.0.0", 8090).usePlaintext(false).build
+  val channel = ManagedChannelBuilder.forAddress("0.0.0.0", 50051).usePlaintext(true).build
   val request = HelloRequest(name = "World")
   val service = HttpService[IO] {
     case GET -> Root / "hello" / name =>
@@ -34,8 +34,8 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     BlazeBuilder[IO]
-      .withSSL(StoreInfo(keypath, "password"), keyManagerPassword = "secure")
-      .enableHttp2(true)
+//      .withSSL(StoreInfo(keypath, "password"), keyManagerPassword = "secure")
+//      .enableHttp2(true)
       .bindHttp(9000, "0.0.0.0")
       .mountService(service, "/")
       .serve
