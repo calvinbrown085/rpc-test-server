@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package com.calvin.rpc;
+
+
+
+service Account {
+    rpc GetAccount (AccountRequest) returns (AccountResponse) {}
+}
+
+
+message AccountRequest {
+    string accountId = 1;
+}
+
+
+message AccountResponse {
+    string accountId = 1;
+    string accountNumber = 2;
+    string accountType = 3;
+    int64 accountBalance = 4;
+}

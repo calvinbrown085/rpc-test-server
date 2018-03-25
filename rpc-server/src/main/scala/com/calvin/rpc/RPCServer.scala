@@ -1,5 +1,6 @@
 package com.calvin.rpc
 
+import com.calvin.rpc.account._
 import com.calvin.rpc.hello._
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
@@ -26,16 +27,19 @@ class GreeterImpl extends GreeterGrpc.Greeter {
   }
 }
 
+
 object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   val service = HttpService[IO] {
-    case GET -> Root / "hello" / name =>
-      Ok(Json.obj("message" -> Json.fromString(s"Hello, ${name}")))
+    case GET -> Root =>
+      Ok("Welcome to the RPC Test Server!")
 
   }
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
-      grpcServer <- Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global)).build.start))
+      accountRepo <- Stream(AccountRepository.create())
+      grpcServer <- Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global))
+                                                               .addService(AccountGrpc.bindService(new AccountImpl(accountRepo), ExecutionContext.global)).build.start))
       stream <- BlazeBuilder[IO]
                   .bindHttp(8080, "0.0.0.0")
                   .mountService(service, "/")
