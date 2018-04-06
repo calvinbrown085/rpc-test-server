@@ -6,7 +6,6 @@ scala:
   - 2.11.12
 
 before_script:
-before_script:
   - sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
   - echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:' | sudo tee -a /proc/sys/fs/binfmt_misc/register
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -24,5 +23,11 @@ cache:
     - $HOME/.sbt
 
 script:
+  - cp /usr/bin/qemu-arm-static/
   - sbt ++$TRAVIS_SCALA_VERSION test
+  - docker build -t mustang0168/rpi-rpc-caller:1.0.0/
   - sbt dockerBuildAndPush
+
+
+after_success:
+  - docker push mustang0168/rpi-rpc-caller:1.0.0
