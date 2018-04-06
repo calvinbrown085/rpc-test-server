@@ -25,33 +25,9 @@ lazy val rpc_server = (project in file("rpc-server"))
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
-    dockerfile in docker := {
-      val jarFile: File = sbt.Keys.`package`.in(Compile, packageBin).value
-      val classpath = (managedClasspath in Compile).value
-      val mainclass = mainClass.in(Compile, packageBin).value.getOrElse(sys.error("Expected exactly one main class"))
-      val jarTarget = s"/app/${jarFile.getName}"
-      // Make a colon separated classpath with the JAR file
-      val classpathString = classpath.files.map("/app/" + _.getName)
-        .mkString(":") + ":" + jarTarget
+    dockerF,
+    imageN
 
-      new Dockerfile {
-        // Base image
-        from("openjdk:8-jre")
-        // Add all files on the classpath
-        add(classpath.files, "/app/")
-        // Add the JAR file
-        add(jarFile, jarTarget)
-        // On launch run Java with the classpath and the main class
-        entryPoint("java", "-cp", classpathString, mainclass)
-      }
-    },
-    imageNames in docker := Seq(
-      ImageName(
-        namespace = Some(organization.value),
-        repository = name.value,
-        tag = Some(version.value)
-      )
-    )
   )
 
 lazy val rpc_caller = (project in file("rpc-caller"))
@@ -62,33 +38,8 @@ lazy val rpc_caller = (project in file("rpc-caller"))
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
-    dockerfile in docker := {
-      val jarFile: File = sbt.Keys.`package`.in(Compile, packageBin).value
-      val classpath = (managedClasspath in Compile).value
-      val mainclass = mainClass.in(Compile, packageBin).value.getOrElse(sys.error("Expected exactly one main class"))
-      val jarTarget = s"/app/${jarFile.getName}"
-      // Make a colon separated classpath with the JAR file
-      val classpathString = classpath.files.map("/app/" + _.getName)
-        .mkString(":") + ":" + jarTarget
-
-      new Dockerfile {
-        // Base image
-        from("openjdk:8-jre")
-        // Add all files on the classpath
-        add(classpath.files, "/app/")
-        // Add the JAR file
-        add(jarFile, jarTarget)
-        // On launch run Java with the classpath and the main class
-        entryPoint("java", "-cp", classpathString, mainclass)
-      }
-    },
-    imageNames in docker := Seq(
-      ImageName(
-        namespace = Some(organization.value),
-        repository = name.value,
-        tag = Some(version.value)
-      )
-    )
+    dockerF,
+    imageN
   )
 
 
@@ -98,3 +49,33 @@ lazy val root = project.in(file("."))
   .aggregate(
     `rpc_server`, `rpc_caller`
   )
+
+
+val dockerF = dockerfile in docker := {
+  val jarFile: File = sbt.Keys.`package`.in(Compile, packageBin).value
+  val classpath = (managedClasspath in Compile).value
+  val mainclass = mainClass.in(Compile, packageBin).value.getOrElse(sys.error("Expected exactly one main class"))
+  val jarTarget = s"/app/${jarFile.getName}"
+  // Make a colon separated classpath with the JAR file
+  val classpathString = classpath.files.map("/app/" + _.getName)
+      .mkString(":") + ":" + jarTarget
+
+  new Dockerfile {
+    // Base image
+    from("openjdk:8-jre")
+    // Add all files on the classpath
+    add(classpath.files, "/app/")
+    // Add the JAR file
+    add(jarFile, jarTarget)
+    // On launch run Java with the classpath and the main class
+    entryPoint("java", "-cp", classpathString, mainclass)
+  }
+}
+
+val imageN = imageNames in docker := Seq(
+  ImageName(
+    namespace = Some(organization.value),
+    repository = name.value,
+    tag = Some(version.value)
+  )
+)
