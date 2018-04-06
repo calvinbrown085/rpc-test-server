@@ -1,7 +1,7 @@
 package com.calvin.rpc
 
 import com.calvin.rpc.account._
-import com.calvin.rpc.hello._
+import cats.effect._
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
 import io.circe._
@@ -20,12 +20,6 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.ExecutionContext
 
-class GreeterImpl extends GreeterGrpc.Greeter {
-  override def sayHello(req: HelloRequest) = {
-    val reply = HelloReply(message = "Hello " + req.name)
-    Future.successful(reply)
-  }
-}
 
 
 object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
@@ -38,8 +32,7 @@ object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
       accountRepo <- Stream(AccountRepository.create())
-      grpcServer = Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global))
-                                                               .addService(AccountGrpc.bindService(new AccountImpl(accountRepo), ExecutionContext.global)).build.start))
+      grpcServer = Stream(IO.pure(ServerBuilder.forPort(50051).addService(AccountFs2Grpc.bindService[IO](new AccountImpl(accountRepo))(Effect[IO], ExecutionContext.global)).build.start))
       stream <- BlazeBuilder[IO]
                   .bindHttp(8080, "0.0.0.0")
                   .mountService(service, "/")

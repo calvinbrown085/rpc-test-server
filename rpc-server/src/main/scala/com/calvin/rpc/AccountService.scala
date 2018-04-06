@@ -2,14 +2,15 @@ package com.calvin.rpc
 
 
 import com.calvin.rpc.account._
+import cats.effect.Effect
 import cats.effect.IO
 import scala.concurrent.Future
 
 
-class AccountImpl(accountRepository: AccountRepository) extends AccountGrpc.Account {
+class AccountImpl(accountRepository: AccountRepository) extends AccountFs2Grpc[IO] {
 
-  def getAccount(req: AccountRequest): Future[AccountResponse] = {
-    val account = accountRepository.getAccount(req.accountId).unsafeRunSync().get
-    Future.successful(AccountResponse(account.accountId, account.accountNumber, account.accountType, account.balance))
+  def getAccount(request: com.calvin.rpc.account.AccountRequest, clientHeaders: io.grpc.Metadata): IO[AccountResponse] = {
+    val account = accountRepository.getAccount(request.accountId).unsafeRunSync().get
+    IO.pure(AccountResponse(account.accountId, account.accountNumber, account.accountType, account.balance))
   }
 }

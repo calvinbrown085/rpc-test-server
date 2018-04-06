@@ -3,7 +3,9 @@ val Specs2Version = "4.0.3"
 val LogbackVersion = "1.2.3"
 val ProtobufVersion = "3.5.1"
 
-val protobufSettings = PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value)
+val protobufSettings = PB.targets in Compile := Seq(
+  scalapb.gen() -> (sourceManaged in Compile).value,
+  fs2CodeGenerator -> (sourceManaged in Compile).value)
 
 val libraryDeps =  Seq(
   "com.google.protobuf" % "protobuf-java" % ProtobufVersion,
@@ -22,7 +24,7 @@ lazy val rpc_server = (project in file("rpc-server"))
   .settings(
     organization := "mustang0168",
     name := "rpc-server",
-    version := "1.0.3",
+    version := "1.1.0",
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
@@ -36,7 +38,7 @@ lazy val rpc_caller = (project in file("rpc-caller"))
   .settings(
     organization := "mustang0168",
     name := "rpc-caller",
-    version := "1.0.2",
+    version := "1.1.0",
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
@@ -47,7 +49,10 @@ lazy val rpc_caller = (project in file("rpc-caller"))
 
 lazy val root = project.in(file("."))
 
-  .settings(name := "rpc-test-root")
+  .settings(
+    name := "rpc-test-root",
+    scalacOptions += "-Ypartial-unification"
+  )
   .aggregate(
     `rpc_server`, `rpc_caller`
   )

@@ -5,7 +5,7 @@ import java.nio.file.Paths
 
 import io.grpc.ManagedChannelBuilder
 import com.calvin.rpc.account._
-import com.calvin.rpc.hello._
+//import com.calvin.rpc.hello._
 import cats.effect.IO
 import fs2.StreamApp
 import io.circe._
@@ -24,14 +24,14 @@ object RpcCaller extends StreamApp[IO] with Http4sDsl[IO] {
   val service = HttpService[IO] {
     case GET -> Root =>
       Ok("Welcome to the RPC Test Server!")
-    case GET -> Root / "hello-world" =>
-      for {
-        helloStub <- IO.pure(GreeterGrpc.stub(channel))
-        helloRequest <- IO.pure(HelloRequest(name = "World"))
-        reply = IO.pure(helloStub.sayHello(helloRequest))
-        fromFuture = IO.fromFuture(reply)
-        r <- Ok(fromFuture.map(_.toString))
-      } yield r
+//    case GET -> Root / "hello-world" =>
+//      for {
+//        helloStub <- IO.pure(GreeterGrpc.stub(channel))
+//        helloRequest <- IO.pure(HelloRequest(name = "World"))
+//        reply = IO.pure(helloStub.sayHello(helloRequest))
+//        fromFuture = IO.fromFuture(reply)
+//        r <- Ok(fromFuture.map(_.toString))
+//      } yield r
     case GET -> Root / "get-account" / accountId =>
       for {
         accountStub <- IO.pure(AccountGrpc.stub(channel))
