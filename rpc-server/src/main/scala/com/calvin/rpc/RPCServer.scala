@@ -38,11 +38,11 @@ object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
       accountRepo <- Stream(AccountRepository.create())
-      grpcServer <- Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global))
+      grpcServer = Stream(IO.pure(ServerBuilder.forPort(50051).addService(GreeterGrpc.bindService(new GreeterImpl, ExecutionContext.global))
                                                                .addService(AccountGrpc.bindService(new AccountImpl(accountRepo), ExecutionContext.global)).build.start))
       stream <- BlazeBuilder[IO]
                   .bindHttp(8080, "0.0.0.0")
                   .mountService(service, "/")
-                  .serve concurrently Stream.eval(grpcServer)
+                  .serve concurrently grpcServer
     } yield stream
 }
