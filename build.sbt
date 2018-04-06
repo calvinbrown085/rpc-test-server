@@ -22,6 +22,7 @@ lazy val rpc_server = (project in file("rpc-server"))
   .settings(
     organization := "mustang0168",
     name := "rpc-server",
+    version := "1.0.3",
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
@@ -35,6 +36,7 @@ lazy val rpc_caller = (project in file("rpc-caller"))
   .settings(
     organization := "mustang0168",
     name := "rpc-caller",
+    version := "1.0.2",
     scalaVersion := "2.12.5",
     protobufSettings,
     libraryDependencies ++= libraryDeps,
