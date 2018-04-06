@@ -8,6 +8,11 @@ scala:
 jdk:
   - oraclejdk8
 
+sudo: required
+
+services:
+  - docker
+
 cache:
   directories:
     - $HOME/.ivy2/cache
