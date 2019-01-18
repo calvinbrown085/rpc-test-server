@@ -1,32 +1,31 @@
-val Http4sVersion = "0.18.7"
+val Http4sVersion = "0.18.16"
 val Specs2Version = "4.0.3"
 val LogbackVersion = "1.2.3"
-val ProtobufVersion = "3.5.1"
 
-val protobufSettings = PB.targets in Compile := Seq(
-  scalapb.gen() -> (sourceManaged in Compile).value,
-  fs2CodeGenerator -> (sourceManaged in Compile).value)
+lazy val protobuf =
+  project
+      .in(file("protobuf"))
+      .enablePlugins(Fs2Grpc)
+
 
 val libraryDeps =  Seq(
-  "com.google.protobuf" % "protobuf-java" % ProtobufVersion,
+  "io.grpc" % "grpc-netty-shaded" % scalapb.compiler.Version.grpcJavaVersion,
   "org.http4s"      %% "http4s-blaze-server" % Http4sVersion,
   "org.http4s"      %% "http4s-circe"        % Http4sVersion,
+  "org.http4s"      %% "http4s-prometheus-server-metrics"        % Http4sVersion,
   "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
   "org.specs2"     %% "specs2-core"          % Specs2Version % "test",
-  "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
-  "io.grpc" % "grpc-stub" % "1.10.0",
-  "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
-  "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+  "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
 )
 
 lazy val rpc_server = (project in file("rpc-server"))
   .enablePlugins(DockerPlugin)
+  .enablePlugins(Fs2Grpc)
   .settings(
     organization := "mustang0168",
     name := "rpc-server",
     version := "1.2.0",
     scalaVersion := "2.12.5",
-    protobufSettings,
     libraryDependencies ++= libraryDeps,
     dockerF,
     imageN
@@ -35,12 +34,12 @@ lazy val rpc_server = (project in file("rpc-server"))
 
 lazy val rpc_caller = (project in file("rpc-caller"))
 .enablePlugins(DockerPlugin)
+.enablePlugins(Fs2Grpc)
   .settings(
     organization := "mustang0168",
     name := "rpc-caller",
     version := "1.2.0",
     scalaVersion := "2.12.5",
-    protobufSettings,
     libraryDependencies ++= libraryDeps,
     dockerF,
     imageN

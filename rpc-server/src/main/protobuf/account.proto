@@ -3,6 +3,7 @@ syntax = "proto3";
 package com.calvin.rpc;
 
 
+
 service Account {
     rpc GetAccount (AccountRequest) returns (AccountResponse) {}
 }

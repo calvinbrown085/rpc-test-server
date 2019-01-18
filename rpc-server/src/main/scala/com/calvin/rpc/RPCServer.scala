@@ -7,18 +7,14 @@ import fs2.{Stream, StreamApp}
 import io.circe._
 import java.nio.file.Paths
 
-import io.grpc.{Server, ServerBuilder}
-
-
+import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
 import org.http4s._
-import org.http4s.circe._
-import org.http4s.server.SSLKeyStoreSupport.StoreInfo
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.blaze.BlazeBuilder
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.ExecutionContext
+import org.lyranthe.fs2_grpc.java_runtime.implicits._
 
 
 
@@ -32,7 +28,9 @@ object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
       accountRepo <- Stream(AccountRepository.create[IO]())
-      grpcServer = Stream(IO.pure(ServerBuilder.forPort(50051).addService(AccountFs2Grpc.bindService[IO](new AccountImpl(accountRepo))(Effect[IO], ExecutionContext.global)).build.start))
+      grpc = AccountFs2Grpc.bindService[IO](new AccountImpl(accountRepo))(Effect[IO], ExecutionContext.Implicits.global)
+      grpcServer = ServerBuilder.forPort(9999).addService(grpc).stream[IO].evalMap(server => IO(server.start()))
+          .evalMap(_ => IO.never)
       stream <- BlazeBuilder[IO]
                   .bindHttp(8080, "0.0.0.0")
                   .mountService(service, "/")

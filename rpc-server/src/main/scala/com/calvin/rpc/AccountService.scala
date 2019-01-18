@@ -1,11 +1,9 @@
 package com.calvin.rpc
 
 
-import com.calvin.rpc.account._
 import cats.implicits._
 import cats.effect.Sync
-import cats.effect.IO
-import scala.concurrent.Future
+import com.calvin.rpc.account.{AccountFs2Grpc, AccountResponse}
 
 
 class AccountImpl[F[_]: Sync](accountRepository: AccountRepository[F]) extends AccountFs2Grpc[F] {
