@@ -20,7 +20,7 @@ val libraryDeps =  Seq(
 
 lazy val rpc_server = (project in file("rpc-server"))
   .enablePlugins(DockerPlugin)
-  .enablePlugins(Fs2Grpc)
+  .dependsOn(protobuf)
   .settings(
     organization := "mustang0168",
     name := "rpc-server",
@@ -34,7 +34,7 @@ lazy val rpc_server = (project in file("rpc-server"))
 
 lazy val rpc_caller = (project in file("rpc-caller"))
 .enablePlugins(DockerPlugin)
-.enablePlugins(Fs2Grpc)
+  .dependsOn(protobuf)
   .settings(
     organization := "mustang0168",
     name := "rpc-caller",
@@ -53,7 +53,7 @@ lazy val root = project.in(file("."))
     scalacOptions += "-Ypartial-unification"
   )
   .aggregate(
-    `rpc_server`, `rpc_caller`
+    `rpc_server`, `rpc_caller`, `protobuf`
   )
 
 

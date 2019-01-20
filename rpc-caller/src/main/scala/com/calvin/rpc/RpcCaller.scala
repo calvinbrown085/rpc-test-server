@@ -32,7 +32,7 @@ object RpcCaller extends StreamApp[IO] with Http4sDsl[IO] {
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
-      channel <- ManagedChannelBuilder.forAddress("0.0.0.0", 9999).stream[IO]
+      channel <- ManagedChannelBuilder.forAddress("0.0.0.0", 9999).usePlaintext().stream[IO]
       accountsGrpc = AccountFs2Grpc.stub[IO](channel)
       s <- BlazeBuilder[IO]
           .bindHttp(9000, "0.0.0.0")
