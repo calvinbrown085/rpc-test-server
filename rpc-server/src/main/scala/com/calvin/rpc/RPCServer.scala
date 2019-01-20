@@ -1,5 +1,6 @@
 package com.calvin.rpc
 
+import com.calvin.rpc.httptest._
 import com.calvin.rpc.account._
 import cats.effect._
 import cats.effect.IO
@@ -28,8 +29,9 @@ object RPCServer extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) =
     for {
       accountRepo <- Stream(AccountRepository.create[IO]())
-      grpc = AccountFs2Grpc.bindService[IO](new AccountImpl(accountRepo))(Effect[IO], ExecutionContext.Implicits.global)
-      grpcServer = ServerBuilder.forPort(9999).addService(grpc).stream[IO].evalMap(server => IO(server.start()))
+      echoService = EchoServiceFs2Grpc.bindService[IO](new EchoService[IO]())(Effect[IO], ExecutionContext.Implicits.global)
+      accountGrpc = AccountFs2Grpc.bindService[IO](new AccountImpl(accountRepo))(Effect[IO], ExecutionContext.Implicits.global)
+      grpcServer = ServerBuilder.forPort(9999).addService(accountGrpc).addService(echoService).stream[IO].evalMap(server => IO(server.start()))
           .evalMap(_ => IO.never)
       stream <- BlazeBuilder[IO]
                   .bindHttp(8080, "0.0.0.0")

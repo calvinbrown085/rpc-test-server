@@ -5,7 +5,12 @@ val LogbackVersion = "1.2.3"
 lazy val protobuf =
   project
       .in(file("protobuf"))
-      .enablePlugins(Fs2Grpc)
+  .enablePlugins(Fs2Grpc)
+  .settings(
+    PB.generate in Compile := (PB.generate in Compile).dependsOn(extractProtos).value,
+    PB.protoSources in Compile += sourceManaged.value / "googleapis-master",
+    libraryDependencies ++= Seq(
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"))
 
 
 val libraryDeps =  Seq(
@@ -17,6 +22,22 @@ val libraryDeps =  Seq(
   "org.specs2"     %% "specs2-core"          % Specs2Version % "test",
   "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
 )
+
+lazy val extractProtos = Def.task {
+  if (!(sourceManaged.value / "googleapis-master").exists) {
+    val zipUrl = "https://github.com/googleapis/googleapis/archive/master.zip"
+    IO.unzipURL(
+      from=url(zipUrl),
+      filter=(
+          "googleapis-master/google/api/*" |
+          "googleapis-master/google/logging/*" |
+          "googleapis-master/google/longrunning/*" |
+          "googleapis-master/google/rpc/*" |
+          "googleapis-master/google/type/*"
+        ),
+      toDirectory=sourceManaged.value)
+  }
+}
 
 lazy val rpc_server = (project in file("rpc-server"))
   .enablePlugins(DockerPlugin)
